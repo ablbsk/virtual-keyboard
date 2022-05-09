@@ -2,7 +2,7 @@ import KEYS from './scripts/keys'
 import './styles/style.scss'
 
 // Global variables
-let cursorPosition = null
+let cursorPosition = [0,0]
 
 /* --------------------------------------------------------------------------------- */
 
@@ -77,6 +77,30 @@ const onKeyDown = event => {
   textAreaEl.value = key.length < 2
     ? onSymbolKeyDown(textAreaEl, key)
     : onSpecialKeyDown(textAreaEl, key)
+}
+
+const onVirtualKeyDown = event => {
+  event.preventDefault()
+
+  const textAreaEl = document.getElementsByClassName('screen')[0]
+
+  const findItem = arr => arr.find(item => event.target.id === item.id)
+
+  const row = Object.keys(KEYS).filter(row => findItem(KEYS[row]))[0]
+
+  if (!row) {
+    return textAreaEl
+  }
+
+  const element = findItem(KEYS[row])
+
+  if (element.type === 'arrow') {
+    textAreaEl.value = onSpecialKeyDown(textAreaEl, element.id)
+  } else {
+    textAreaEl.value = element.type !== 'symbol'
+      ? onSpecialKeyDown(textAreaEl, element.value)
+      : onSymbolKeyDown(textAreaEl, element.value.en[0])
+  }
 }
 
 const onSymbolKeyDown = (textAreaEl, key) => {
@@ -173,7 +197,6 @@ const onSpecialKeyDown = (textAreaEl, key) => {
 
     // Other keys
     default: return value
-
   }
 
   moveCursor(textAreaEl, cursorStart, cursorEnd)
@@ -204,6 +227,7 @@ const replaceValueInside = (value, key, cursorStart, cursorEnd) => {
   cursorEnd = cursorStart = cursorStart + 1
   return [v, cursorStart, cursorEnd]
 }
+/* Change cursor position & textarea value — End */
 
 const moveCursor = (el, start, end) => setTimeout(() => el.setSelectionRange(start, end))
 
@@ -216,22 +240,16 @@ window.onload = () => {
   createBaseElement()
   addRowToKeyboard()
 
-
-  /* Find cursor position */
+  const keyboardEl = document.getElementsByClassName('keyboard')[0]
   const textAreaEl = document.getElementsByClassName('screen')[0]
   textAreaEl.focus()
 
+  /* Find cursor position */
   document.addEventListener('keydown', event => {
-    textAreaEl.focus()
     cursorPosition = [event.target.selectionStart, event.target.selectionEnd]
     onKeyDown(event)
+    textAreaEl.focus()
     console.log('keydown: ', cursorPosition)
-  })
-
-  document.addEventListener('click', () => {
-    const { value } = textAreaEl
-    cursorPosition = [value.length, value.length]
-    console.log('клик вне: ', cursorPosition)
   })
 
   textAreaEl.addEventListener('click', event => {
@@ -240,4 +258,12 @@ window.onload = () => {
     console.log('click: ', cursorPosition)
   })
   /* Find cursor position — End */
+
+  // Find click on virtual key
+  keyboardEl.addEventListener('click', event => {
+    event.stopPropagation()
+    cursorPosition = [textAreaEl.selectionStart, textAreaEl.selectionEnd]
+    onVirtualKeyDown(event)
+    textAreaEl.focus()
+  })
 }
