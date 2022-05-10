@@ -6,7 +6,7 @@ let cursorPosition = [0,0]
 let capslockGlobal = false
 let shiftStatus = false
 let controlStatus = false
-let lang = 'en'
+let lang = localStorage.getItem('lang') || 'en'
 
 /* --------------------------------------------------------------------------------- */
 
@@ -59,7 +59,7 @@ const addKeyToRow = (rowEl, keys) => {
     const keyEl = document.createElement('span')
     keyEl.id = key.id
     keyEl.classList.add('key', 'key__' + key.type)
-    keyEl.innerHTML = typeof key.value === 'object' ? key.value.en[0] : key.value.toUpperCase()
+    keyEl.innerHTML = typeof key.value === 'object' ? key.value[lang][0] : key.value.toUpperCase()
     rowEl.appendChild(keyEl)
   })
 }
@@ -110,6 +110,7 @@ const onVirtualKeyDown = event => {
     if (controlStatus) {
       lang === 'en' ? lang = 'ru' : lang = 'en'
       controlStatus = false
+      localStorage.setItem('lang', lang)
     } else {
       shiftStatus = !shiftStatus
     }
