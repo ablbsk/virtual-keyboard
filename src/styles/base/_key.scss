@@ -21,6 +21,11 @@
   background-color: $color-key-special;
 }
 
+.key--active, .key:active {
+  user-select: none;
+  background-color: $color-key-active;
+}
+
 #Space {
   width: 220px;
 }

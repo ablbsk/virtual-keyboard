@@ -100,34 +100,44 @@ const onVirtualKeyDown = event => {
 
   if (element.type === 'arrow') {
     controlStatus = false
+    deleteElementActiveStyle('Control')
     textAreaEl.value = onSpecialKeyDown(textAreaEl, element.id)
   } else if (element.id === 'CapsLock') {
     capslockGlobal = !capslockGlobal
     controlStatus = false
     changeCaps()
+    deleteElementActiveStyle('Control')
+    changeElementStyle(event.target, capslockGlobal)
   } else if (element.id.includes('Shift')) {
 
     if (controlStatus) {
       lang === 'en' ? lang = 'ru' : lang = 'en'
       controlStatus = false
+      deleteElementActiveStyle('Control')
       localStorage.setItem('lang', lang)
     } else {
       shiftStatus = !shiftStatus
     }
     changeCaps()
+    changeElementStyle(event.target, shiftStatus)
 
   } else if (element.id.includes('Control')) {
     shiftStatus = false
     controlStatus = !controlStatus
     changeCaps()
+    changeElementStyle(event.target, controlStatus)
+    deleteElementActiveStyle('Shift')
   } else {
     controlStatus = false
+    deleteElementActiveStyle('Control')
+
     textAreaEl.value = element.type !== 'symbol'
       ? onSpecialKeyDown(textAreaEl, element.value)
       : onSymbolKeyDown(textAreaEl, changeLabel(element))
 
     if (element.type === 'symbol' && shiftStatus) {
-      shiftStatus = !shiftStatus
+      shiftStatus = false
+      deleteElementActiveStyle('Shift')
       changeCaps()
     }
   }
@@ -293,6 +303,17 @@ const changeLabel = ({ id, type, capslock, value }) => {
     }
 
   }
+}
+
+// Change style
+const changeElementStyle = (el, status) =>
+  status ? el.classList.toggle('key--active') : el.classList.remove('key--active')
+
+const deleteElementActiveStyle = elStr => {
+  const elArr = document.getElementsByClassName('key--active')
+
+  Array.from(elArr).map(el =>
+    el.id.includes(elStr) ? el.classList.remove('key--active') : el)
 }
 
 /* ----- START --------------------------------------------------------------------- */

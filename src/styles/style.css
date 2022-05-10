@@ -55,6 +55,11 @@ main {
   background-color: #00614d;
 }
 
+.key--active, .key:active {
+  user-select: none;
+  background-color: #7a614e;
+}
+
 #Space {
   width: 220px;
 }
@@ -87,6 +92,7 @@ main {
   resize: none;
   border: 2px solid;
   border-radius: 5px;
+  outline: none;
   font-size: 1.6rem;
 }
 
