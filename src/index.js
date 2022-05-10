@@ -4,6 +4,7 @@ import './styles/style.scss'
 // Global variables
 let cursorPosition = [0,0]
 let capslockGlobal = false
+let shiftStatus = false
 
 /* --------------------------------------------------------------------------------- */
 
@@ -97,10 +98,21 @@ const onVirtualKeyDown = event => {
 
   if (element.type === 'arrow') {
     textAreaEl.value = onSpecialKeyDown(textAreaEl, element.id)
+  } else if (element.id === 'CapsLock') {
+    capslockGlobal = !capslockGlobal
+    changeCaps()
+  } else if (element.id.includes('Shift')) {
+    shiftStatus = !shiftStatus
+    changeCaps()
   } else {
     textAreaEl.value = element.type !== 'symbol'
       ? onSpecialKeyDown(textAreaEl, element.value)
-      : onSymbolKeyDown(textAreaEl, checkCapsInBlacklist(element))
+      : onSymbolKeyDown(textAreaEl, changeLabel(element))
+
+    if (element.type === 'symbol' && shiftStatus) {
+      shiftStatus = !shiftStatus
+      changeCaps()
+    }
   }
 }
 
@@ -186,11 +198,6 @@ const onSpecialKeyDown = (textAreaEl, key) => {
       }
       break
 
-    case 'CapsLock':
-      capslockGlobal = !capslockGlobal
-      changeCaps()
-      return value
-
     // Arrows
     case 'ArrowUp':
       return value += '▲'
@@ -244,16 +251,30 @@ const changeCaps = () => {
     const parent = item.parentElement.classList[1]
     const element = KEYS[parent].find(key => key.id === item.id)
 
-    item.innerText = checkCapsInBlacklist(element)
+    item.innerText = changeLabel(element)
   })
 }
 
-const checkCapsInBlacklist = ({ id, type, capslock, value }) => {
-  const i = capslockGlobal ? 1 : 0
-  if (type === 'symbol' && id !== 'Space') {
-    return capslock.en ? value.en[i] : value.en[0]
+const changeLabel = ({ id, type, capslock, value }) => {
+  let i = capslockGlobal ? 1 : 0
+
+  if (shiftStatus) {
+    i ? i = 0 : i = 1
+
+    if (type === 'symbol' && id !== 'Space') {
+      return value.en[i]
+    } else {
+      return typeof value === 'object' ? value.en[i] : value.toUpperCase()
+    }
+
   } else {
-    return typeof value === 'object' ? value.en[i] : value.toUpperCase()
+
+    if (type === 'symbol' && id !== 'Space') {
+      return capslock.en ? value.en[i] : value.en[0]
+    } else {
+      return typeof value === 'object' ? value.en[i] : value.toUpperCase()
+    }
+
   }
 }
 
