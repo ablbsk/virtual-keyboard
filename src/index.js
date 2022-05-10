@@ -5,6 +5,8 @@ import './styles/style.scss'
 let cursorPosition = [0,0]
 let capslockGlobal = false
 let shiftStatus = false
+let controlStatus = false
+let lang = 'en'
 
 /* --------------------------------------------------------------------------------- */
 
@@ -19,7 +21,7 @@ const createBaseElement = () => {
 
 // Info
   const info = document.createElement('p')
-  info.innerHTML = 'Для переключения языка комбинация: Ctrl + Shift (Слево)'
+  info.innerHTML = 'Для переключения языка комбинация: Ctrl + Shift'
   main.appendChild(info)
 
 // Textarea
@@ -97,14 +99,28 @@ const onVirtualKeyDown = event => {
   const element = findItem(KEYS[row])
 
   if (element.type === 'arrow') {
+    controlStatus = false
     textAreaEl.value = onSpecialKeyDown(textAreaEl, element.id)
   } else if (element.id === 'CapsLock') {
     capslockGlobal = !capslockGlobal
+    controlStatus = false
     changeCaps()
   } else if (element.id.includes('Shift')) {
-    shiftStatus = !shiftStatus
+
+    if (controlStatus) {
+      lang === 'en' ? lang = 'ru' : lang = 'en'
+      controlStatus = false
+    } else {
+      shiftStatus = !shiftStatus
+    }
+    changeCaps()
+
+  } else if (element.id.includes('Control')) {
+    shiftStatus = false
+    controlStatus = !controlStatus
     changeCaps()
   } else {
+    controlStatus = false
     textAreaEl.value = element.type !== 'symbol'
       ? onSpecialKeyDown(textAreaEl, element.value)
       : onSymbolKeyDown(textAreaEl, changeLabel(element))
@@ -262,17 +278,17 @@ const changeLabel = ({ id, type, capslock, value }) => {
     i ? i = 0 : i = 1
 
     if (type === 'symbol' && id !== 'Space') {
-      return value.en[i]
+      return value[lang][i]
     } else {
-      return typeof value === 'object' ? value.en[i] : value.toUpperCase()
+      return typeof value === 'object' ? value[lang][i] : value.toUpperCase()
     }
 
   } else {
 
     if (type === 'symbol' && id !== 'Space') {
-      return capslock.en ? value.en[i] : value.en[0]
+      return capslock[lang] ? value[lang][i] : value[lang][0]
     } else {
-      return typeof value === 'object' ? value.en[i] : value.toUpperCase()
+      return typeof value === 'object' ? value[lang][i] : value.toUpperCase()
     }
 
   }
@@ -288,14 +304,21 @@ window.onload = () => {
 
   const keyboardEl = document.getElementsByClassName('keyboard')[0]
   const textAreaEl = document.getElementsByClassName('screen')[0]
+
   textAreaEl.focus()
 
   /* Find cursor position */
   document.addEventListener('keydown', event => {
     cursorPosition = [event.target.selectionStart, event.target.selectionEnd]
-    onKeyDown(event)
-    textAreaEl.focus()
-    console.log('keydown: ', cursorPosition)
+
+    if (event.ctrlKey && event.shiftKey) {
+      lang === 'en' ? lang = 'ru' : lang = 'en'
+      changeCaps()
+    } else {
+      onKeyDown(event)
+      textAreaEl.focus()
+      console.log('keydown: ', cursorPosition)
+    }
   })
 
   textAreaEl.addEventListener('click', event => {
@@ -309,6 +332,7 @@ window.onload = () => {
   keyboardEl.addEventListener('click', event => {
     event.stopPropagation()
     cursorPosition = [textAreaEl.selectionStart, textAreaEl.selectionEnd]
+
     onVirtualKeyDown(event)
     textAreaEl.focus()
   })
