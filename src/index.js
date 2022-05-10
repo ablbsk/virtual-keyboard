@@ -326,6 +326,7 @@ window.onload = () => {
 
   const keyboardEl = document.getElementsByClassName('keyboard')[0]
   const textAreaEl = document.getElementsByClassName('screen')[0]
+  const capsLockEl = document.getElementById('CapsLock')
 
   textAreaEl.focus()
 
@@ -338,9 +339,33 @@ window.onload = () => {
       changeCaps()
     } else {
       onKeyDown(event)
+
+      const activeElement = document.getElementById(event.code)
+      activeElement.classList.toggle('key--active')
+
       textAreaEl.focus()
       console.log('keydown: ', cursorPosition)
     }
+  })
+
+  document.addEventListener('keyup', event => {
+    const activeElement = document.getElementById(event.code)
+
+    if (event.getModifierState("CapsLock")) {
+      capslockGlobal = true
+      changeCaps()
+    } else {
+      capslockGlobal = false
+      changeCaps()
+    }
+
+    if (activeElement.id !== 'CapsLock') {
+      activeElement.classList.remove('key--active')
+    }
+  })
+
+  capsLockEl.addEventListener('keydown', () => {
+    capsLockEl.classList.toggle('key--active')
   })
 
   textAreaEl.addEventListener('click', event => {
