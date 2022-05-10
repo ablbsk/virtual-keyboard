@@ -1,0 +1,35 @@
+.key {
+  height: 35px;
+  padding: 5px 12.5px;
+
+  cursor: pointer;
+  color: $color-key-text;
+
+  border: 2px solid $color-laptop;
+  border-radius: $main-border-radius;
+}
+
+.key__symbol {
+  font-size: 1.75rem;
+
+  background-color: $color-key-symbol;
+}
+
+.key__special, .key__arrow {
+  font-size: 1.2rem;
+
+  background-color: $color-key-special;
+}
+
+.key--active, .key:active {
+  user-select: none;
+  background-color: $color-key-active;
+}
+
+#Space {
+  width: 220px;
+}
+
+#Plug {
+  width: 20px;
+}

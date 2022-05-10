@@ -1,0 +1,12 @@
+.screen {
+  width: $width-laptop;
+  height: 150px;
+
+  resize: none;
+
+  border: 2px solid;
+  border-radius: $main-border-radius;
+  outline: none;
+
+  font-size: 1.6rem;
+}
